@@ -19,6 +19,16 @@ class S3Sync:
         if shutil.which("aws") is None:
             raise NetworkSecurityException("AWS CLI is not installed or not in PATH.", sys)
 
+    @staticmethod
+    def _extract_bucket_root(aws_bucket_url: str) -> str:
+        if not aws_bucket_url.startswith("s3://"):
+            raise NetworkSecurityException(f"Invalid S3 URL: {aws_bucket_url}", sys)
+        bucket_and_path = aws_bucket_url.replace("s3://", "", 1)
+        bucket = bucket_and_path.split("/", 1)[0].strip()
+        if not bucket:
+            raise NetworkSecurityException(f"Invalid S3 bucket in URL: {aws_bucket_url}", sys)
+        return f"s3://{bucket}"
+
     def _run_aws_command(self, command: list[str], operation_name: str) -> None:
         attempt = 1
         while attempt <= AWS_SYNC_MAX_RETRIES:
@@ -65,8 +75,9 @@ class S3Sync:
     def _verify_bucket_access(self, aws_bucket_url: str) -> None:
         if not ENABLE_S3_BUCKET_CHECK:
             return
-        command = ["aws", "s3", "ls", aws_bucket_url]
-        self._run_aws_command(command=command, operation_name=f"Bucket check for {aws_bucket_url}")
+        bucket_root = self._extract_bucket_root(aws_bucket_url=aws_bucket_url)
+        command = ["aws", "s3", "ls", bucket_root]
+        self._run_aws_command(command=command, operation_name=f"Bucket check for {bucket_root}")
 
     def sync_folder_to_s3(self, folder: str, aws_bucket_url: str) -> None:
         if not os.path.isdir(folder):
