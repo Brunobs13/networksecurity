@@ -12,7 +12,7 @@ ECR_REPOSITORY_NAME = networkssecurity
 
 Setup local `.env`:
 MONGODB_URI=
-TRAINING_BUCKET_NAME=networksecurity
+TRAINING_BUCKET_NAME=networksecurity2
 
 DAGSHUB_BASE_URL=https://dagshub.com
 DAGSHUB_REPO_OWNER=Brunobs13

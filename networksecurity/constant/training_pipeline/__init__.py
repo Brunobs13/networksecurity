@@ -70,7 +70,7 @@ MODEL_TRAINER_TRAINED_MODEL_NAME: str = "model.pkl"
 MODEL_TRAINER_EXPECTED_SCORE: float = 0.6
 MODEL_TRAINER_OVER_FIITING_UNDER_FITTING_THRESHOLD: float = 0.05
 
-TRAINING_BUCKET_NAME = os.getenv("TRAINING_BUCKET_NAME", "networksecurity")
+TRAINING_BUCKET_NAME = os.getenv("TRAINING_BUCKET_NAME", "networksecurity2")
 
 # DagsHub / MLflow
 DAGSHUB_BASE_URL: str = os.getenv("DAGSHUB_BASE_URL", "https://dagshub.com")
@@ -83,3 +83,14 @@ DEFAULT_MLFLOW_TRACKING_URI: str = f"{DAGSHUB_REPO_URL}.mlflow"
 DVC_REMOTE_NAME: str = os.getenv("DVC_REMOTE_NAME", "origin")
 DVC_REMOTE_URL: str = f"{DAGSHUB_REPO_URL}.dvc"
 DVC_REMOTE_ENDPOINT_URL: str = f"{DAGSHUB_REPO_URL}.s3"
+
+# Optional pipeline toggles
+ENABLE_S3_SYNC: bool = os.getenv("ENABLE_S3_SYNC", "false").lower() in {"1", "true", "yes"}
+
+# AWS S3 sync settings
+S3_ARTIFACTS_DIR: str = "artifacts"
+S3_FINAL_MODEL_DIR: str = "final_model"
+ENABLE_S3_BUCKET_CHECK: bool = os.getenv("ENABLE_S3_BUCKET_CHECK", "true").lower() in {"1", "true", "yes"}
+AWS_SYNC_TIMEOUT_SECONDS: int = int(os.getenv("AWS_SYNC_TIMEOUT_SECONDS", "600"))
+AWS_SYNC_MAX_RETRIES: int = int(os.getenv("AWS_SYNC_MAX_RETRIES", "3"))
+AWS_SYNC_RETRY_DELAY_SECONDS: int = int(os.getenv("AWS_SYNC_RETRY_DELAY_SECONDS", "5"))
