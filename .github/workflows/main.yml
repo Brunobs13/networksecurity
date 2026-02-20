@@ -28,13 +28,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY_INPUT: ${{ secrets.AWS_SECRET_ACCESS_KEY || secrets.AWS_SECRET_KEY || secrets.AWS_SECRET_ACCESS_KEY_ID || vars.AWS_SECRET_ACCESS_KEY || vars.AWS_SECRET_KEY || vars.AWS_SECRET_ACCESS_KEY_ID }}
           AWS_REGION_INPUT: ${{ secrets.AWS_REGION || vars.AWS_REGION }}
           AWS_ECR_LOGIN_URI_INPUT: ${{ secrets.AWS_ECR_LOGIN_URI || vars.AWS_ECR_LOGIN_URI }}
-          ECR_REPOSITORY_INPUT: ${{ secrets.ECR_REPOSITORY_NAME || vars.ECR_REPOSITORY_NAME }}
         run: |
           test -n "$AWS_ACCESS_KEY_ID_INPUT" || { echo "::error::Missing AWS access key in Secrets/Variables"; exit 1; }
           test -n "$AWS_SECRET_ACCESS_KEY_INPUT" || { echo "::error::Missing AWS secret key in Secrets/Variables"; exit 1; }
           test -n "$AWS_REGION_INPUT" || { echo "::error::Missing AWS_REGION in Secrets/Variables"; exit 1; }
           test -n "$AWS_ECR_LOGIN_URI_INPUT" || { echo "::error::Missing AWS_ECR_LOGIN_URI in Secrets/Variables"; exit 1; }
-          test -n "$ECR_REPOSITORY_INPUT" || { echo "::error::Missing ECR_REPOSITORY_NAME in Secrets/Variables"; exit 1; }
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -51,10 +49,9 @@ jobs:
 
       - name: Build, tag and push Docker image
         env:
-          ECR_REGISTRY: ${{ secrets.AWS_ECR_LOGIN_URI || vars.AWS_ECR_LOGIN_URI }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME || vars.ECR_REPOSITORY_NAME }}
+          ECR_IMAGE_URI: ${{ secrets.AWS_ECR_LOGIN_URI || vars.AWS_ECR_LOGIN_URI }}
           IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t networksecurity:$IMAGE_TAG .
+          docker tag networksecurity:$IMAGE_TAG $ECR_IMAGE_URI:$IMAGE_TAG
+          docker push $ECR_IMAGE_URI:$IMAGE_TAG
