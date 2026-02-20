@@ -44,6 +44,7 @@ class ModelTrainer:
     def track_mlflow(self,best_model,classificationmetric,stage_label:str):
         mlflow.set_registry_uri(self.mlflow_tracking_uri)
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+        model_name = best_model.__class__.__name__
         with mlflow.start_run(run_name=f"{best_model.__class__.__name__}_{stage_label}"):
             f1_score=classificationmetric.f1_score
             precision_score=classificationmetric.precision_score
@@ -71,7 +72,7 @@ class ModelTrainer:
                 },
                 "metrics/summary.json",
             )
-            mlflow.sklearn.log_model(best_model,"model")
+            mlflow.sklearn.log_model(best_model, "model")
             if os.path.exists(self.data_transformation_artifact.transformed_object_file_path):
                 mlflow.log_artifact(
                     self.data_transformation_artifact.transformed_object_file_path,
@@ -84,9 +85,7 @@ class ModelTrainer:
                 # There are other ways to use the Model Registry, which depends on the use case,
                 # please refer to the doc for more information:
                 # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-                mlflow.sklearn.log_model(best_model, "model", registered_model_name=best_model)
-            else:
-                mlflow.sklearn.log_model(best_model, "model")
+                mlflow.sklearn.log_model(best_model, "model", registered_model_name=model_name)
 
 
         
@@ -156,7 +155,7 @@ class ModelTrainer:
         os.makedirs(model_dir_path,exist_ok=True)
 
         Network_Model=NetworkModel(preprocessor=preprocessor,model=best_model)
-        save_object(self.model_trainer_config.trained_model_file_path,obj=NetworkModel)
+        save_object(self.model_trainer_config.trained_model_file_path,obj=Network_Model)
         #model pusher
         save_object("final_model/model.pkl",best_model)
         

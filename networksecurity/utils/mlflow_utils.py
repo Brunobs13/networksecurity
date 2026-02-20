@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from networksecurity.constant.training_pipeline import (
     DAGSHUB_REPO_OWNER,
     DAGSHUB_REPO_NAME,
+    DAGSHUB_REPO_URL,
     DEFAULT_MLFLOW_TRACKING_URI,
 )
 
@@ -27,7 +28,7 @@ def initialize_mlflow() -> str:
     global _MLFLOW_INITIALIZED
 
     if not _HOOKS_INSTALLED:
-        install_hooks()
+        install_hooks(repo_url=DAGSHUB_REPO_URL)
         _HOOKS_INSTALLED = True
 
     if not _MLFLOW_INITIALIZED:
