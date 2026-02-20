@@ -22,11 +22,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate AWS secrets
+        env:
+          AWS_ACCESS_KEY_ID_INPUT: ${{ secrets.AWS_ACCESS_KEY_ID || secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY_INPUT: ${{ secrets.AWS_SECRET_ACCESS_KEY || secrets.AWS_SECRET_KEY }}
+          AWS_REGION_INPUT: ${{ secrets.AWS_REGION }}
+          AWS_ECR_LOGIN_URI_INPUT: ${{ secrets.AWS_ECR_LOGIN_URI }}
+          ECR_REPOSITORY_INPUT: ${{ secrets.ECR_REPOSITORY_NAME }}
+        run: |
+          test -n "$AWS_ACCESS_KEY_ID_INPUT" || { echo "::error::Missing secret: AWS_ACCESS_KEY (or AWS_ACCESS_KEY_ID)"; exit 1; }
+          test -n "$AWS_SECRET_ACCESS_KEY_INPUT" || { echo "::error::Missing secret: AWS_SECRET_KEY (or AWS_SECRET_ACCESS_KEY)"; exit 1; }
+          test -n "$AWS_REGION_INPUT" || { echo "::error::Missing secret: AWS_REGION"; exit 1; }
+          test -n "$AWS_ECR_LOGIN_URI_INPUT" || { echo "::error::Missing secret: AWS_ECR_LOGIN_URI"; exit 1; }
+          test -n "$ECR_REPOSITORY_INPUT" || { echo "::error::Missing secret: ECR_REPOSITORY_NAME"; exit 1; }
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID || secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY || secrets.AWS_SECRET_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
