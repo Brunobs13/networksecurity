@@ -11,6 +11,7 @@ AWS_ECR_LOGIN_URI = 788614365622.dkr.ecr.us-east-1.amazonaws.com/networkssecurit
 ECR_REPOSITORY_NAME = networkssecurity
 
 Setup local `.env`:
+MONGODB_URI=
 MONGO_DB_URL=
 MONGO_DATABASE_NAME=KRISHAI
 MONGO_COLLECTION_NAME=NetworkData
