@@ -33,6 +33,8 @@ class DataIngestion:
         try:
             database_name=self.data_ingestion_config.database_name
             collection_name=self.data_ingestion_config.collection_name
+            if not MONGO_DB_URL:
+                raise ValueError("Set MONGO_DB_URL in your environment before running data ingestion.")
             self.mongo_client=pymongo.MongoClient(MONGO_DB_URL)
             collection=self.mongo_client[database_name][collection_name]
 

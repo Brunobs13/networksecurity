@@ -48,9 +48,9 @@ class NetworkDataExtract():
             raise NetworkSecurityException(e,sys)
         
 if __name__=='__main__':
-    FILE_PATH="Network_Data\phisingData.csv"
-    DATABASE="KRISHAI"
-    Collection="NetworkData"
+    FILE_PATH = "Network_Data/phisingData.csv"
+    DATABASE = os.getenv("MONGO_DATABASE_NAME", "networksecurity")
+    Collection = os.getenv("MONGO_COLLECTION_NAME", "NetworkData")
     networkobj=NetworkDataExtract()
     records=networkobj.csv_to_json_convertor(file_path=FILE_PATH)
     print(records)

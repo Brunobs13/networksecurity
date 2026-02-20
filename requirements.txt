@@ -1,9 +1,8 @@
 python-dotenv
 pandas
 numpy
-pymongo
 certifi
-pymongo[srv]
+pymongo[srv]==4.16.0
 scikit-learn
 mlflow
 pyaml
