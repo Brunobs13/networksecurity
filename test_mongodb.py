@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-uri = os.getenv("MONGO_DB_URL")
+uri = os.getenv("MONGODB_URI") or os.getenv("MONGO_DB_URL")
 if not uri:
-    raise ValueError("Set MONGO_DB_URL before running test_mongodb.py")
+    raise ValueError("Set MONGODB_URI before running test_mongodb.py")
 
 # Create a new client and connect to the server
 client = MongoClient(uri, tlsCAFile=certifi.where(), server_api=ServerApi("1"))

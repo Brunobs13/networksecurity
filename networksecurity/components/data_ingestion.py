@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+MONGODB_URI=os.getenv("MONGODB_URI")
 
 
 class DataIngestion:
@@ -33,9 +34,10 @@ class DataIngestion:
         try:
             database_name=self.data_ingestion_config.database_name
             collection_name=self.data_ingestion_config.collection_name
-            if not MONGO_DB_URL:
-                raise ValueError("Set MONGO_DB_URL in your environment before running data ingestion.")
-            self.mongo_client=pymongo.MongoClient(MONGO_DB_URL)
+            mongo_uri = MONGODB_URI or MONGO_DB_URL
+            if not mongo_uri:
+                raise ValueError("Set MONGODB_URI in your environment before running data ingestion.")
+            self.mongo_client=pymongo.MongoClient(mongo_uri)
             collection=self.mongo_client[database_name][collection_name]
 
             df=pd.DataFrame(list(collection.find()))

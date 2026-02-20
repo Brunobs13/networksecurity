@@ -6,9 +6,9 @@ ca = certifi.where()
 
 from dotenv import load_dotenv
 load_dotenv()
-mongo_db_url = os.getenv("MONGO_DB_URL")
+mongo_db_url = os.getenv("MONGODB_URI") or os.getenv("MONGO_DB_URL")
 if not mongo_db_url:
-    raise ValueError("Set MONGO_DB_URL in your environment before starting the app.")
+    raise ValueError("Set MONGODB_URI in your environment before starting the app.")
 import pymongo
 from networksecurity.exception.exception import NetworkSecurityException
 from networksecurity.logging.logger import logging

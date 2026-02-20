@@ -12,13 +12,24 @@ ECR_REPOSITORY_NAME = networkssecurity
 
 Setup local `.env`:
 MONGODB_URI=
-MONGO_DB_URL=
-MONGO_DATABASE_NAME=test
-MONGO_COLLECTION_NAME=network_data
 TRAINING_BUCKET_NAME=networksecurity
+
+DAGSHUB_BASE_URL=https://dagshub.com
+DAGSHUB_REPO_OWNER=Brunobs13
+DAGSHUB_REPO_NAME=networksecurity
+DAGSHUB_USER=
+DAGSHUB_TOKEN=
+
 MLFLOW_TRACKING_URI=
 MLFLOW_TRACKING_USERNAME=
 MLFLOW_TRACKING_PASSWORD=
+
+DVC setup (no hardcoded credentials):
+chmod +x setup_dvc.sh
+./setup_dvc.sh
+
+Training entrypoint:
+python pipeline/training_pipeline.py
 
 
 Docker Setup In EC2 commands to be Executed

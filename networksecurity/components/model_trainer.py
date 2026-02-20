@@ -26,19 +26,7 @@ from sklearn.ensemble import (
 import mlflow
 from urllib.parse import urlparse
 
-import dagshub
-# dagshub.init(repo_owner='your_dagshub_user', repo_name='networksecurity', mlflow=True)
-
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI")
-MLFLOW_TRACKING_USERNAME = os.getenv("MLFLOW_TRACKING_USERNAME")
-MLFLOW_TRACKING_PASSWORD = os.getenv("MLFLOW_TRACKING_PASSWORD")
-
-if MLFLOW_TRACKING_URI:
-    os.environ["MLFLOW_TRACKING_URI"] = MLFLOW_TRACKING_URI
-if MLFLOW_TRACKING_USERNAME:
-    os.environ["MLFLOW_TRACKING_USERNAME"] = MLFLOW_TRACKING_USERNAME
-if MLFLOW_TRACKING_PASSWORD:
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = MLFLOW_TRACKING_PASSWORD
+from networksecurity.utils.mlflow_utils import initialize_mlflow
 
 
 
@@ -49,24 +37,46 @@ class ModelTrainer:
         try:
             self.model_trainer_config=model_trainer_config
             self.data_transformation_artifact=data_transformation_artifact
+            self.mlflow_tracking_uri = initialize_mlflow()
         except Exception as e:
             raise NetworkSecurityException(e,sys)
         
-    def track_mlflow(self,best_model,classificationmetric):
-        if MLFLOW_TRACKING_URI:
-            mlflow.set_registry_uri(MLFLOW_TRACKING_URI)
+    def track_mlflow(self,best_model,classificationmetric,stage_label:str):
+        mlflow.set_registry_uri(self.mlflow_tracking_uri)
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
-        with mlflow.start_run():
+        with mlflow.start_run(run_name=f"{best_model.__class__.__name__}_{stage_label}"):
             f1_score=classificationmetric.f1_score
             precision_score=classificationmetric.precision_score
             recall_score=classificationmetric.recall_score
 
-            
+            mlflow.log_params(
+                {
+                    "model_class": best_model.__class__.__name__,
+                    "stage": stage_label,
+                    "expected_accuracy": self.model_trainer_config.expected_accuracy,
+                    "overfit_underfit_threshold": self.model_trainer_config.overfitting_underfitting_threshold,
+                }
+            )
+
 
             mlflow.log_metric("f1_score",f1_score)
             mlflow.log_metric("precision",precision_score)
             mlflow.log_metric("recall_score",recall_score)
+            mlflow.log_dict(
+                {
+                    "f1_score": f1_score,
+                    "precision_score": precision_score,
+                    "recall_score": recall_score,
+                    "stage": stage_label,
+                },
+                "metrics/summary.json",
+            )
             mlflow.sklearn.log_model(best_model,"model")
+            if os.path.exists(self.data_transformation_artifact.transformed_object_file_path):
+                mlflow.log_artifact(
+                    self.data_transformation_artifact.transformed_object_file_path,
+                    artifact_path="preprocessor",
+                )
             # Model registry does not work with file store
             if tracking_url_type_store != "file":
 
@@ -132,13 +142,13 @@ class ModelTrainer:
         classification_train_metric=get_classification_score(y_true=y_train,y_pred=y_train_pred)
         
         ## Track the experiements with mlflow
-        self.track_mlflow(best_model,classification_train_metric)
+        self.track_mlflow(best_model,classification_train_metric,"train")
 
 
         y_test_pred=best_model.predict(x_test)
         classification_test_metric=get_classification_score(y_true=y_test,y_pred=y_test_pred)
 
-        self.track_mlflow(best_model,classification_test_metric)
+        self.track_mlflow(best_model,classification_test_metric,"test")
 
         preprocessor = load_object(file_path=self.data_transformation_artifact.transformed_object_file_path)
             
