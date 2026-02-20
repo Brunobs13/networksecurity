@@ -2,6 +2,9 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 """
 defining common constant variable for training pipeline
