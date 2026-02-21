@@ -60,8 +60,17 @@ jobs:
     needs: continuous-delivery
     runs-on: self-hosted
     steps:
-      - name: Login to AWS ECR
-        run: aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 047588357673.dkr.ecr.eu-north-1.amazonaws.com
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID || secrets.AWS_ACCESS_KEY || vars.AWS_ACCESS_KEY_ID || vars.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY || secrets.AWS_SECRET_KEY || secrets.AWS_SECRET_ACCESS_KEY_ID || vars.AWS_SECRET_ACCESS_KEY || vars.AWS_SECRET_KEY || vars.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
 
       - name: Pull latest image
         run: docker pull 047588357673.dkr.ecr.eu-north-1.amazonaws.com/networksecurity2:latest
