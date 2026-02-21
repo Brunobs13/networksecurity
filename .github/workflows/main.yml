@@ -55,3 +55,29 @@ jobs:
           docker build -t networksecurity:$IMAGE_TAG .
           docker tag networksecurity:$IMAGE_TAG $ECR_IMAGE_URI:$IMAGE_TAG
           docker push $ECR_IMAGE_URI:$IMAGE_TAG
+
+  continuous-deployment:
+    needs: continuous-delivery
+    runs-on: self-hosted
+    steps:
+      - name: Login to AWS ECR
+        run: aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 047588357673.dkr.ecr.eu-north-1.amazonaws.com
+
+      - name: Pull latest image
+        run: docker pull 047588357673.dkr.ecr.eu-north-1.amazonaws.com/networksecurity2:latest
+
+      - name: Stop existing container
+        run: docker stop networksecurity || true
+
+      - name: Remove old container
+        run: docker rm networksecurity || true
+
+      - name: Run new container
+        run: |
+          docker run -d \
+            -p 8080:8080 \
+            --name networksecurity \
+            047588357673.dkr.ecr.eu-north-1.amazonaws.com/networksecurity2:latest
+
+      - name: Clean unused images
+        run: docker image prune -af
